@@ -1,3 +1,4 @@
+use std::ops::Add;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -341,7 +342,7 @@ impl<Adapter: APIAdapter + 'static> AxonJsonRpcServer for JsonRpcImpl<Adapter> {
             .map_err(|e| Error::Custom(e.to_string()))?;
 
         if resp.exit_reason.is_succeed() {
-            return Ok(resp.gas_used.into());
+            return Ok(resp.gas_used.add(200000).into());
         }
 
         Err(RpcError::VM(resp).into())
