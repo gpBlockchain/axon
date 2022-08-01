@@ -1,6 +1,6 @@
 name:  Openzeppelin Contracts Tests 1-5 And 12-15
 concurrency:
-  group: Openzeppelin Contracts-${{ github.ref }}
+  group: Openzeppelin Contracts-1-5 And 12-15-${{ github.ref }}
   cancel-in-progress: true
 
 
