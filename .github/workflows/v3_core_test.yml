@@ -1,4 +1,7 @@
 name: v3 Core Tests
+concurrency:
+  group: v3 Core-${{ github.ref }}
+  cancel-in-progress: true
 
 
 on:
@@ -51,28 +54,34 @@ jobs:
           ./target/debug/axon --config devtools/chain/config.toml --genesis devtools/chain/genesis_single_node.json > /tmp/log 2>&1 &
 
       - name: Install dependencies
-        run: yarn install
+        run: |
+          cd /home/runner/work/axon/axon/v3-core
+          yarn install
 
       # This is required separately from yarn test because it generates the typechain definitions
       - name: Compile
-        run: yarn compile
+        run: |
+          cd /home/runner/work/axon/axon/v3-core
+          yarn compile
 
       - name: Run tests 0
         id: runtest
         run: |
+          cd /home/runner/work/axon/axon/v3-core
           yarn test:prepare
           yarn test:runAll0
 
       - name: Run test 1
         if: success() || failure()
         run: |
+          cd /home/runner/work/axon/axon/v3-core
           yarn test:runAll1
 
       - name: Run test 2
         if: success() || failure()
         run: |
+          cd /home/runner/work/axon/axon/v3-core
           yarn test:runAll2
-
 
       - name: Check Axon Status
         if: success() || failure()
