@@ -1,0 +1,73 @@
+name: v3 Core Tests
+
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+
+jobs:
+  v3-core-test:
+    needs: prologue
+    strategy:
+      fail-fast: false
+      matrix:
+        net: ['axon']
+    runs-on: ubuntu-latest
+    if: needs.prologue.outputs.job_skip == 'run'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: gpBlockchain/v3-core
+          path: v3-core
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Deploy Local Network of Axon
+        run: |
+          cargo build
+          rm -rf ./devtools/chain/data
+          ./target/debug/axon --config devtools/chain/config.toml --genesis devtools/chain/genesis_single_node.json > /tmp/log 2>&1 &
+
+      - name: Install dependencies
+        run: yarn install
+
+      # This is required separately from yarn test because it generates the typechain definitions
+      - name: Compile
+        run: yarn compile
+
+      - name: Run tests 0
+        id: runtest
+        run: |
+          yarn test:prepare
+          yarn test:runAll0
+
+      - name: Run test 1
+        if: success() || failure()
+        run: |
+          yarn test:runAll1
+
+      - name: Run test 2
+        if: success() || failure()
+        run: |
+          yarn test:runAll2
+
+
+      - name: Check Axon Status
+        if: success() || failure()
+        run: |
+          curl http://localhost:8000 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params": [],"id":1}'
+
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: jfoa-build-reports-${{ runner.os }}
+          path: v3-core/mochawesome-report/
