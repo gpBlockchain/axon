@@ -9,6 +9,20 @@ on:
 
 
 jobs:
+  prologue:
+    name: prologue
+    runs-on: ubuntu-20.04
+    outputs:
+      job_skip: ${{ steps.prologue.outputs.job_skip }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: prologue
+        id: prologue
+        uses: ./.github/actions/ci_prologue
+        with:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_COMMONS_BODY: "${{ github.event.pull_request.body }}"
+          GITHUB_WORKFLOW: ${{ github.workflow }}
   v3-core-test:
     needs: prologue
     strategy:
