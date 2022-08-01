@@ -69,12 +69,6 @@ jobs:
           npm install
           npm run test:init
 
-      - name: Run prepare
-        id: runtest
-        run: |
-          cd /home/runner/work/axon/axon/openzeppelin-contracts
-          npm install
-          npm run test:init
       - name: Run Pipeline 5-6
         if: success() || failure()
         run: |
